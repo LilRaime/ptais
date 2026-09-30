@@ -1,0 +1,4 @@
+numpy>=2.0.0
+opencv-python>=4.10.0
+matplotlib>=3.9.0
+rich>=13.0.0

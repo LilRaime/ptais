@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDEs & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Operating System
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Dataset & Downloaded Artifacts
+dataset/
+open_images_metadata/
+plots/
