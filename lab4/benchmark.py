@@ -97,16 +97,16 @@ def save_plots(results, path: Path):
 def save_report(results, report_path: Path, args):
     base_lat = results["PyTorch"]["stats"]["mean_ms"]
     lines = [
-        "# Лабораторна робота №4: Порівняльний аналіз Inference Frameworks",
+        "# Lab 4: Benchmark Report",
         "",
-        "## 1. Конфігурація бенчмарку",
-        f"- **Модель:** `{args.model_name or 'mobilenet_v3_small'}`",
-        f"- **Розмір входу:** `{args.img_size}x{args.img_size}`, Batch size: `{args.batch_size}`",
-        f"- **Ітерації:** `{args.warmup}` warmup / `{args.iterations}` тест",
+        "## 1. Benchmark Configuration",
+        f"- **Model:** `{args.model_name or 'mobilenet_v3_small'}`",
+        f"- **Input Shape:** `{args.img_size}x{args.img_size}`, Batch size: `{args.batch_size}`",
+        f"- **Iterations:** `{args.warmup}` warmup / `{args.iterations}` benchmark runs",
         "",
-        "## 2. Порівняльна таблиця результатів",
+        "## 2. Performance Summary Table",
         "",
-        "| Фреймворк / Двигун | Mean (ms) | Median (ms) | Min (ms) | Max (ms) | P95 (ms) | Std (ms) | FPS | Speedup | RSS (MB) |",
+        "| Framework / Engine | Mean (ms) | Median (ms) | Min (ms) | Max (ms) | P95 (ms) | Std (ms) | FPS | Speedup | RAM (MB) |",
         "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
     ]
     for eng, d in results.items():
@@ -116,13 +116,9 @@ def save_report(results, report_path: Path, args):
 
     lines.extend([
         "",
-        "## 3. Графіки порівняння",
+        "## 3. Comparison Charts",
         "",
         "![Benchmark Comparison](plots/benchmark_comparison.png)",
-        "",
-        "## 4. Пояснення отриманих відмінностей",
-        "- **ONNX Runtime:** Використовує Constant Folding (згортання константних вузлів), Operator Fusion (об'єднання Conv+BN+Activation в єдиний монолітний кернел), мінімізує виділення пам'яті та усуває накладні витрати інтерпретатора Python.",
-        "- **OpenVINO:** Задіює оптимізовані інструкції Intel CPU (AVX-512, AVX2, VNNI), перетворює тензори у блокову розкладку пам'яті (Blocked Layout) під ширину SIMD-регістрів і кеш-ліній та ефективно балансує навантаження через TBB (Thread Building Blocks).",
     ])
     report_path.write_text("\n".join(lines), encoding="utf-8")
 
@@ -161,7 +157,7 @@ def main():
     table.add_column("Std (ms)", justify="right")
     table.add_column("FPS", justify="right", style="bold green")
     table.add_column("Speedup", justify="right", style="bold yellow")
-    table.add_column("RSS (MB)", justify="right")
+    table.add_column("RAM (MB)", justify="right")
 
     base = results["PyTorch"]["stats"]["mean_ms"]
     for eng, d in results.items():

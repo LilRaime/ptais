@@ -2,3 +2,4 @@
 __pycache__/
 *.py[cod]
 plots/
+benchmark_report.md
