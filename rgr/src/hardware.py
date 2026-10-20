@@ -54,14 +54,22 @@ def audit_hardware_devices() -> dict[str, Any]:
 
         gpu_devices = [d for d in ov_devices if d.startswith("GPU")]
         if gpu_devices and not devices["GPU"]["available"]:
-            gpu_dev = gpu_devices[0]
+            best_gpu = gpu_devices[0]
+            for g in gpu_devices:
+                try:
+                    p = core.get_property(g, "FULL_DEVICE_NAME")
+                    if any(k in p for k in ["NVIDIA", "RTX", "GeForce", "Intel Arc", "Iris"]):
+                        best_gpu = g
+                        break
+                except Exception:
+                    pass
             try:
-                name = core.get_property(gpu_dev, "FULL_DEVICE_NAME")
+                name = core.get_property(best_gpu, "FULL_DEVICE_NAME")
             except Exception:
-                name = gpu_dev
+                name = best_gpu
             devices["GPU"]["available"] = True
-            devices["GPU"]["details"] = f"OpenVINO {gpu_dev}: {name}"
-            devices["GPU"]["reason"] = "OpenVINO GPU target operational"
+            devices["GPU"]["details"] = f"{name}"
+            devices["GPU"]["reason"] = "Dedicated GPU accelerator operational"
 
         if "NPU" in ov_devices:
             try:

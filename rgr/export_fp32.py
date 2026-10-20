@@ -8,6 +8,10 @@ from rich.console import Console
 from rich.table import Table
 from src.models import load_trained_model
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -55,8 +59,8 @@ def main():
     table.add_column("Value", style="bold green")
     table.add_row("Model Architecture", model_name)
     table.add_row("Classes", ", ".join(class_names))
-    table.add_row("Input Tensor", f"[batch_size, 3, {img_size}, {img_size}] (FP32)")
-    table.add_row("Output Tensor", f"[batch_size, {len(class_names)}] (FP32 Logits)")
+    table.add_row("Input Tensor", f"\\[batch_size, 3, {img_size}, {img_size}] (FP32)")
+    table.add_row("Output Tensor", f"\\[batch_size, {len(class_names)}] (FP32 Logits)")
     table.add_row("File Size", f"{size_mb:.2f} MB")
     table.add_row("Export Path", str(args.output))
     table.add_row("Graph Verification", "PASSED (onnx.checker)")

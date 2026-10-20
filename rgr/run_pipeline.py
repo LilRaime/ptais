@@ -1,4 +1,5 @@
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -174,6 +175,24 @@ def main():
 
     save_stage_breakdown_plot(mean_pre, mean_inf, mean_post, mean_tot, bottleneck_info["bottleneck_stage"], args.plot_breakdown)
     console.print(f"[bold green]Saved stage breakdown plot to:[/bold green] {args.plot_breakdown}")
+
+    metrics_json_path = args.plot_breakdown.parent / "pipeline_metrics.json"
+    metrics_json_path.parent.mkdir(parents=True, exist_ok=True)
+    pipeline_data = {
+        "engine": engine_name,
+        "model": str(args.model),
+        "preprocess_ms": round(mean_pre, 2),
+        "inference_ms": round(mean_inf, 2),
+        "postprocess_ms": round(mean_post, 2),
+        "total_ms": round(mean_tot, 2),
+        "fps": round(1000.0 / mean_tot, 1) if mean_tot > 0 else 0.0,
+        "bottleneck_stage": bottleneck_info["bottleneck_stage"],
+        "percentages": {k: round(v, 1) for k, v in bottleneck_info["percentages"].items()},
+        "diagnosis": bottleneck_info["diagnosis"],
+        "recommendations": bottleneck_info["recommendations"],
+    }
+    with open(metrics_json_path, "w", encoding="utf-8") as f:
+        json.dump(pipeline_data, f, indent=2)
 
 if __name__ == "__main__":
     main()

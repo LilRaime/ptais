@@ -7,6 +7,11 @@ from rich.console import Console
 from rich.table import Table
 from src.quantization import quantize_dynamic_onnx, quantize_static_onnx
 
+import logging
+import warnings
+logging.disable(logging.WARNING)
+warnings.filterwarnings("ignore")
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 

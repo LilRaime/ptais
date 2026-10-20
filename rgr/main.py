@@ -14,7 +14,7 @@ def run_step(step_num: int, title: str, cmd: list):
     console.print("\n[bold cyan]==================================================[/bold cyan]")
     console.print(f"[bold cyan]Step {step_num}: {title}[/bold cyan]")
     console.print("[bold cyan]==================================================[/bold cyan]")
-    env = dict(os.environ, PYTHONIOENCODING="utf-8")
+    env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONWARNINGS="ignore")
     res = subprocess.run([sys.executable] + cmd, env=env)
     if res.returncode != 0:
         console.print(f"[bold red]Step {step_num} failed with code {res.returncode}[/bold red]")
@@ -36,7 +36,7 @@ def main():
     run_step(5, "Benchmark Execution Devices (CPU / GPU / NPU Audit)", ["benchmark_devices.py", "--iterations", str(args.iterations), "--warmup", str(args.warmup)])
     run_step(6, "Compile Final Report & Decision Matrix", ["generate_report.py"])
 
-    console.print("\n[bold green][SUCCESS] All RGR tasks completed successfully! Review benchmark_report.md and plots/ directory.[/bold green]\n")
+    console.print("\n[bold green][SUCCESS] All tasks completed successfully! Review benchmark_report.md and plots/ directory.[/bold green]\n")
 
 if __name__ == "__main__":
     main()

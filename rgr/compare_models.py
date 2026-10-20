@@ -1,5 +1,6 @@
 import argparse
 import gc
+import json
 import os
 import sys
 import time
@@ -203,7 +204,7 @@ def main():
     table.add_row("Mean Latency", f"{fp32_stats['mean_ms']:.2f} ms", f"{int8_stats['mean_ms']:.2f} ms", f"{speedup:.2f}x speedup")
     table.add_row("Median Latency", f"{fp32_stats['median_ms']:.2f} ms", f"{int8_stats['median_ms']:.2f} ms", f"{fp32_stats['median_ms']/int8_stats['median_ms']:.2f}x")
     table.add_row("P95 Latency", f"{fp32_stats['p95_ms']:.2f} ms", f"{int8_stats['p95_ms']:.2f} ms", f"{fp32_stats['p95_ms'] - int8_stats['p95_ms']:.2f} ms faster")
-    table.add_row("Throughput (FPS)", f"{fp32_stats['fps']:.1f} FPS", f"{int8_stats['fps']:.1f} FPS", f"+{int8_stats['fps'] - fp32_stats['fps']:.1f} FPS")
+    table.add_row("Throughput (FPS)", f"{fp32_stats['fps']:.1f} FPS", f"{int8_stats['fps']:.1f} FPS", f"{int8_stats['fps'] - fp32_stats['fps']:+.1f} FPS")
     table.add_row("Process RAM (RSS)", f"{fp32_stats['mem_mb']:.1f} MB", f"{int8_stats['mem_mb']:.1f} MB", f"{int8_stats['mem_mb'] - fp32_stats['mem_mb']:+.1f} MB")
     table.add_row("Dataset Accuracy", f"{acc_info['acc_fp32']:.2f}%", f"{acc_info['acc_int8']:.2f}%", f"{acc_info['acc_delta']:+.2f}% drop")
     table.add_row("Prediction Agreement", "100.0%", f"{acc_info['agreement_rate']:.2f}%", f"{acc_info['agreement_rate']:.1f}% matching")
@@ -211,6 +212,21 @@ def main():
     table.add_row("Cosine Similarity", "1.000000", f"{acc_info['mean_cos_sim']:.6f}", "[bold green]High Fidelity[/bold green]")
 
     console.print(table)
+
+    metrics_path = args.output_dir / "comparison_metrics.json"
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    metrics_data = {
+        "fp32_size_mb": round(fp32_size, 2),
+        "int8_size_mb": round(int8_size, 2),
+        "compression_ratio": round(size_ratio, 2),
+        "reduction_pct": round((1.0 - (int8_size / fp32_size)) * 100.0, 1) if fp32_size > 0 else 0.0,
+        "speedup": round(speedup, 2),
+        "fp32_stats": {k: (round(v, 4) if isinstance(v, float) else v) for k, v in fp32_stats.items()},
+        "int8_stats": {k: (round(v, 4) if isinstance(v, float) else v) for k, v in int8_stats.items()},
+        "acc_info": {k: (round(v, 4) if isinstance(v, float) else v) for k, v in acc_info.items()},
+    }
+    with open(metrics_path, "w", encoding="utf-8") as f:
+        json.dump(metrics_data, f, indent=2)
 
     plot_path = args.output_dir / "accuracy_and_performance.png"
     generate_comparison_plots(fp32_stats, int8_stats, acc_info, fp32_size, int8_size, fp32_lats, int8_lats, plot_path)

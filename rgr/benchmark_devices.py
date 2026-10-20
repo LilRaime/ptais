@@ -1,5 +1,6 @@
 import argparse
 import gc
+import json
 import os
 import sys
 import time
@@ -147,10 +148,12 @@ def main():
         dev_title = f"OpenVINO {g_dev}"
         try:
             full_name = core.get_property(g_dev, "FULL_DEVICE_NAME")
-            if "NVIDIA" in full_name or "RTX" in full_name:
-                dev_title = "OpenVINO GPU (RTX 4060)"
-            elif "1035" in full_name or "Radeon" in full_name:
-                dev_title = "OpenVINO GPU (Radeon iGPU)"
+            if "NVIDIA" in full_name or "RTX" in full_name or "GeForce" in full_name:
+                dev_title = "OpenVINO GPU"
+            elif any(k in full_name for k in ["1035", "Radeon", "AMD"]):
+                continue
+            else:
+                dev_title = f"OpenVINO GPU ({full_name[:18]})"
         except Exception:
             pass
 
@@ -187,6 +190,24 @@ def main():
 
     save_devices_plot(results, args.output_plot)
     console.print(f"[bold green]Saved hardware benchmark chart to:[/bold green] {args.output_plot}")
+
+    metrics_json_path = args.output_plot.parent / "devices_metrics.json"
+    metrics_json_path.parent.mkdir(parents=True, exist_ok=True)
+    devices_clean = {}
+    for k, v in results.items():
+        devices_clean[k] = {
+            "mean_ms": round(v["mean_ms"], 2),
+            "median_ms": round(v["median_ms"], 2),
+            "p95_ms": round(v["p95_ms"], 2),
+            "fps": round(v["fps"], 1),
+            "mem_mb": round(v["mem_mb"], 1),
+        }
+    with open(metrics_json_path, "w", encoding="utf-8") as f:
+        json.dump({
+            "specs": specs,
+            "audit": audit,
+            "results": devices_clean
+        }, f, indent=2)
 
 if __name__ == "__main__":
     main()
